@@ -1,23 +1,28 @@
 <template>
   <el-card class="SpellWord">
 	<div>
-		<span class="tag-group__title m-1"> {{ showquest(0, data.quest) }}</span>
-		<el-input :style="so_inputanswer" 
-              ref="refinput" 
-              v-model="answer" 
+		<span class="tag-group__title m-1"> {{ showRequest(0, data.quest) }}</span>
+    <!-- 
+      題目狀態：
+        尚未答題：VSpellWord_status.none 
+        答題正確：VSpellWord_status.correct
+        答題錯誤：VSpellWord_status.incorrect 
+    -->
+		<el-input ref="ref_input" 
+              v-model="input_value"             
+              :placeholder="input_placeholder"
+              :readonly="input_readonly" 
+              :maxlength="data.word.length"
+              @keyup.enter="onEnter"
+              class="input-answer" 
+              :style="input_style"   
               v-bind:class='{ 
-                 hint: status != VSpellWord_status.none, 
-                "input-success": status != VSpellWord_status.none && isMatch, 
-                "input-failed": status != VSpellWord_status.none && isMatch === false, 
-                "empty-hide": status != VSpellWord_status.none && isEmpty }' 
-              @input="typeInput" 
-              :readonly="status != VSpellWord_status.none" 
-              :maxlength="data.word.length" 
-              v-on:keypress.enter="onEnter"
-              autocomplete="off" 
-              class="input-answer ls-2" />
-		<span class="tag-group__title m-1 answer" v-if="status != VSpellWord_status.none"> {{ data.word }}</span>
-		<span class="tag-group__title m-1"> {{ showquest(1, data.quest) }}</span>
+                   "input-none": status === VSpellWord_status.none,
+                "input-correct": match,
+              "input-incorrect": !match
+              }'
+              autocomplete="off"   />
+		<span class="tag-group__title m-1"> {{ showRequest(1, data.quest) }}</span>
 	</div>
   <div class="text item mb-10">{{ data.quest_desc }}</div>
 	<div class="tag-group">
@@ -43,14 +48,8 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, watch } from "vue";
+import { toRefs, ref, defineComponent, watch } from "vue";
 import { VSpellWord_status, SpellWord_Types, SpellWord_Status, SpellWord } from "../models/SpellWord";
-
-let answer = ref('');
-let so_inputanswer = { width: '0px'};
-let self_data: SpellWord;
-let isMatch: boolean;
-let isEmpty: boolean;
 
 let SpellWordDefault = new SpellWord();
 SpellWordDefault.quest = " Loading Quest...";
@@ -58,7 +57,8 @@ SpellWordDefault.quest_desc = "題目載入中";
 SpellWordDefault.type = SpellWord_Types.normal;
 SpellWordDefault.status = SpellWord_Status.Enable;
 SpellWordDefault.word = "UNKNOWN";
-SpellWordDefault.word_desc = "UNKNOWN";
+SpellWordDefault.word_desc_tw = "UNKNOWN";
+SpellWordDefault.word_desc_en = "UNKNOWN";
 SpellWordDefault.partOfSpeech = "UNKNOWN";
 SpellWordDefault._prefix = null;          
 SpellWordDefault._prefix_desc = null;     
@@ -71,69 +71,94 @@ SpellWordDefault.link1 = null;
 SpellWordDefault.link2 = null;
 SpellWordDefault.link3 = null;
 
-function showquest(index: number, quest: string) {
-  return quest.split('_')[index];
-}
+let input_value = ref('');
+let input_placeholder = ref('');
+let input_readonly = ref(false);
+let input_style = ref({ width: '0px'});
 
 export default defineComponent({
   name: "VSpellWord",
   props: {
-    data: {
-      type: SpellWord,
-      default: SpellWordDefault
-    },
-    status: {
-      type: Number,  //-1: 未做, 0: 作錯, 1: 作對
-      default: VSpellWord_status.none
-    }
+    // 題目資料 Model
+    data:         { type: SpellWord,  default: SpellWordDefault       },
+    /*  題目狀態：
+        尚未答題：VSpellWord_status.none 
+        答題正確：VSpellWord_status.correct
+        答題錯誤：VSpellWord_status.incorrect 
+    */
+    status:       { type: Number,     default: VSpellWord_status.none },
+    /* 答案與正解是否相同：
+        一旦 status 從 VSpellWord_status.none 進入到 VSpellWord_status.incorrect 或 VSpellWord_status.correct 則 status 不變， match 仍改變。
+     */
+    match:        { type: Boolean,    default: false                  },
+    text:         { type: String,     default: ''                     },
+    placeholder:  { type: String,     default: ''                     },
+    readonly:     { type: Boolean,    default: false                  }
   },
-  emits: ['update:status','onEnterUp'],
+  emits: ['update:status','update:match','update:input_value','onEnterUp','onMatch'],
   data(){ 
-    isMatch = false;
-    isEmpty = true;
     return {
       VSpellWord_status,
-      showquest,
-      answer,
-      so_inputanswer,
-      self_data,
-      isMatch,
-      isEmpty
+      input_value,
+      input_placeholder,
+      input_readonly,
+      input_style
     }
   },
   methods: {
-    typeInput() {
-      this.isMatch = this.data.word === this.answer;
-      this.isEmpty = this.answer.length === 0;
-      //console.log(this.data.word, this.answer, isMatch);
-    },
-    focusInput() {
-      (this.$refs.refinput as any).focus();
-    },
-    onEnter() {
-      this.$emit('onEnterUp', true);
+    onFocus() { (this.$refs.ref_input as any).focus(); },
+    onEnter() { this.$emit('onEnterUp', true); },
+    showRequest(index: number, quest: string) { return quest.split('_')[index]; }
+  },
+  watch: {
+    input_value: function(val, oldVal) {
+      this.$emit('update:input_value', val);
     }
   },
   mounted() {
-    this.focusInput();
+    this.onFocus();
   },
-  setup(props, {attrs, slots, emit, expose}) {
+  setup(props, {emit}) {
+    const { data, status, text, placeholder, readonly } = toRefs(props);
     
-    answer.value = '';
+    input_value.value = text.value;
+    input_placeholder.value = placeholder.value;
+    input_readonly.value = readonly.value;
+    
     let w = 0;
-    for(let i = 0; i < props.data.word.length; i++)
-    {
+    for(let i = 0; i < data.value.word.length; i++)
       w += 9;
-    }
-    so_inputanswer.width = w + 'px';
+    input_style.value.width = w + 'px';
     
     const confirm = () => {
-      let newstatus = (props.data.word === answer.value ? 1 : 0);
-      //console.log('update:status', props.data.word, answer.value, newstatus);
-      emit('update:status', newstatus);
+      let newmatch = input_value.value === data.value.word;
+      console.log(newmatch, input_value.value, data.value.word);
+      emit('update:match', newmatch);
+      if (newmatch) { emit('onMatch', true); }
+      
+      if(status.value === VSpellWord_status.none)
+      {
+        let newstatus = VSpellWord_status.none;
+        if(input_value.value === data.value.word)
+          newstatus = VSpellWord_status.correct;
+        else
+          newstatus = VSpellWord_status.incorrect;
+        emit('update:status', newstatus);
+      }
+      
+      if(!newmatch)
+      {
+        input_placeholder.value = data.value.word;
+        input_value.value = '';
+      }
     }
     
-    return { confirm };
+    const show = () => {
+      emit('update:status', VSpellWord_status.incorrect);
+      input_placeholder.value = data.value.word;
+      input_value.value = '';
+    }
+    return { confirm, show };
   }
 });
 </script>
@@ -150,34 +175,34 @@ export default defineComponent({
   font-family: 微軟正黑體;
   letter-spacing: 1px;
 }
-.tag-group {
-  text-align: left;
+.tag-group { text-align: left; }
+.tag { font-size: inherit; }
+.input-answer { vertical-align: bottom; }
+.input-answer     >>> input { letter-spacing: 1.5px; padding: 13px 4px 0px 4px; }
+.input-none       >>> input { color: #000; }
+.input-correct    >>> input { font-weight: bold; color: green; }
+/* .input-incorrect  >>> input { font-weight: bold; color: red; } */ 
+.input-correct    >>> input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: green;
+  opacity: 1; /* Firefox */
 }
-.tag {
-  font-size: inherit;
+.input-correct    >>> input:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: green;
 }
-.input-answer {
-  vertical-align: bottom;
+.input-correct    >>> input::-ms-input-placeholder { /* Microsoft Edge */
+  color: green;
 }
-.answer {
-  text-decoration: underline;
-  font-weight: bold;
+.input-incorrect    >>> input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: red;
+  opacity: 1; /* Firefox */
 }
-.hint {
-  position: absolute;
-  top: 6px;
-  margin-left: -4px;
+.input-incorrect    >>> input:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: red;
 }
-.hint >>> input {
-  border: none;
-  background: transparent;
-  font-weight: bold;
+.input-incorrect    >>> input::-ms-input-placeholder { /* Microsoft Edge */
+  color: red;
 }
-.input-success >>> input { color: white; background: green; }
-.input-failed >>> input { color: white; background: red; }
 .mb-10 { margin-bottom: 10px; }
 .mr-5{ margin-right: 5px; }
-.ls-2 >>> input { letter-spacing: 2px; padding: 0 5px; }
 .inlineblock { display: inline-block; }
-.empty-hide { display: none !important; }
 </style>
