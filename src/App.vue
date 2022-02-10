@@ -1,11 +1,11 @@
 <template>
-  <el-row :gutter="20" v-if="$route.path !== '/'">
+  <el-row v-if="$route.path !== '/'">
     <el-col :span="24"><router-link to="/">返回主選單</router-link></el-col>
   </el-row>
-  <el-row :gutter="20"><el-col :span="24"><router-view /></el-col></el-row>
-  <el-row :gutter="20" v-if="$route.path === '/'">
-    <el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1" v-for="(r) in routes" :key="r.name">
-      <router-link  v-if="r.path !== '/'"  class="mmenu" :to="r.path">{{r.name}}</router-link>
+  <el-row><el-col :span="24"><router-view /></el-col></el-row>
+  <el-row v-if="$route.path === '/'">
+    <el-col :xs="1" :sm="3" :md="4" :lg="6" :xl="8" v-for="(r) in routes.filter(x => x.path !== '/')" :key="r.name">
+      <router-link class="mmenu" :to="r.path">{{r.name}}</router-link>
     </el-col>
   </el-row>
 </template>
