@@ -4,9 +4,9 @@
 		<span class="tag-group__title m-1"> {{ showRequest(0, data.quest) }}</span>
     <!-- 
       題目狀態：
-        尚未答題：VSpellWord_status.none 
-        答題正確：VSpellWord_status.correct
-        答題錯誤：VSpellWord_status.incorrect 
+        尚未答題：C_WordPractice_status.none 
+        答題正確：C_WordPractice_status.correct
+        答題錯誤：C_WordPractice_status.incorrect 
     -->
 		<el-input ref="ref_input" 
               v-model="input_value"             
@@ -17,7 +17,7 @@
               class="input-answer" 
               :style="input_style"   
               v-bind:class='{ 
-                   "input-none": status === VSpellWord_status.none,
+                   "input-none": status === C_WordPractice_status.none,
                 "input-correct": match,
               "input-incorrect": !match
               }'
@@ -29,18 +29,18 @@
 		<el-tag class="tag mr-5" type="warning" effect="dark">{{ data.partOfSpeech }}</el-tag>
 		<span class="tag-group__title m-1"> {{ data.word_desc }}</span>
 	</div>
-	<div class="mb-10" v-if="data._prefix && status != VSpellWord_status.none" />
-	<div class="tag-group" v-if="data._prefix && status != VSpellWord_status.none">
+	<div class="mb-10" v-if="data._prefix && status != C_WordPractice_status.none" />
+	<div class="tag-group" v-if="data._prefix && status != C_WordPractice_status.none">
 		<el-tag class="tag mr-5" effect="dark">字首</el-tag>
 		<span class="tag-group__title m-1"> {{ data._prefix }} {{ data._prefix_desc }}</span>
 	</div>
-	<div class="mb-10" v-if="data._root && status != VSpellWord_status.none" />
-	<div class="tag-group" v-if="data._root && status != VSpellWord_status.none">
+	<div class="mb-10" v-if="data._root && status != C_WordPractice_status.none" />
+	<div class="tag-group" v-if="data._root && status != C_WordPractice_status.none">
 		<el-tag class="tag mr-5" effect="dark">字根</el-tag>
 		<span class="tag-group__title m-1"> {{ data._root }} {{ data._root_desc }}</span>
 	</div>
-	<div class="mb-10" v-if="data._suffix && status != VSpellWord_status.none" />
-	<div class="tag-group" v-if="data._suffix && status != VSpellWord_status.none">
+	<div class="mb-10" v-if="data._suffix && status != C_WordPractice_status.none" />
+	<div class="tag-group" v-if="data._suffix && status != C_WordPractice_status.none">
 		<el-tag class="tag mr-5" effect="dark">字尾</el-tag>
 		<span class="tag-group__title m-1"> {{ data._suffix }} {{ data._suffix_desc }}</span>
 	</div>
@@ -49,27 +49,27 @@
 
 <script lang="ts">
 import { toRefs, ref, defineComponent, watch } from "vue";
-import { VSpellWord_status, SpellWord_Types, SpellWord_Status, SpellWord } from "../models/SpellWord";
+import { C_WordPractice_status, WordPractice_Types, WordPractice_Status, WordPractice } from "./WordPractice";
 
-let SpellWordDefault = new SpellWord();
-SpellWordDefault.quest = " Loading Quest...";
-SpellWordDefault.quest_desc = "題目載入中";
-SpellWordDefault.type = SpellWord_Types.normal;
-SpellWordDefault.status = SpellWord_Status.Enable;
-SpellWordDefault.word = "UNKNOWN";
-SpellWordDefault.word_desc_tw = "UNKNOWN";
-SpellWordDefault.word_desc_en = "UNKNOWN";
-SpellWordDefault.partOfSpeech = "UNKNOWN";
-SpellWordDefault._prefix = null;          
-SpellWordDefault._prefix_desc = null;     
-SpellWordDefault._suffix = null;          
-SpellWordDefault._suffix_desc = null;        
-SpellWordDefault._root = null;   
-SpellWordDefault._root_desc = null;              
-SpellWordDefault.audio = null;
-SpellWordDefault.link1 = null;
-SpellWordDefault.link2 = null;
-SpellWordDefault.link3 = null;
+let Default = new WordPractice();
+Default.quest = " Loading Quest...";
+Default.quest_desc = "題目載入中";
+Default.type = WordPractice_Types.normal;
+Default.status = WordPractice_Status.Enable;
+Default.word = "UNKNOWN";
+Default.word_desc_tw = "UNKNOWN";
+Default.word_desc_en = "UNKNOWN";
+Default.partOfSpeech = "UNKNOWN";
+Default._prefix = null;          
+Default._prefix_desc = null;     
+Default._suffix = null;          
+Default._suffix_desc = null;        
+Default._root = null;   
+Default._root_desc = null;              
+Default.audio = null;
+Default.link1 = null;
+Default.link2 = null;
+Default.link3 = null;
 
 let input_value = ref('');
 let input_placeholder = ref('');
@@ -77,18 +77,18 @@ let input_readonly = ref(false);
 let input_style = ref({ width: '0px'});
 
 export default defineComponent({
-  name: "VSpellWord",
+  name: "C_WordPractice",
   props: {
     // 題目資料 Model
-    data:         { type: SpellWord,  default: SpellWordDefault       },
+    data:         { type: WordPractice,  default: Default       },
     /*  題目狀態：
-        尚未答題：VSpellWord_status.none 
-        答題正確：VSpellWord_status.correct
-        答題錯誤：VSpellWord_status.incorrect 
+        尚未答題：C_WordPractice_status.none 
+        答題正確：C_WordPractice_status.correct
+        答題錯誤：C_WordPractice_status.incorrect 
     */
-    status:       { type: Number,     default: VSpellWord_status.none },
+    status:       { type: Number,     default: C_WordPractice_status.none },
     /* 答案與正解是否相同：
-        一旦 status 從 VSpellWord_status.none 進入到 VSpellWord_status.incorrect 或 VSpellWord_status.correct 則 status 不變， match 仍改變。
+        一旦 status 從 C_WordPractice_status.none 進入到 C_WordPractice_status.incorrect 或 C_WordPractice_status.correct 則 status 不變， match 仍改變。
      */
     match:        { type: Boolean,    default: false                  },
     text:         { type: String,     default: ''                     },
@@ -98,7 +98,7 @@ export default defineComponent({
   emits: ['update:status','update:match','update:input_value','onEnterUp','onMatch'],
   data(){ 
     return {
-      VSpellWord_status,
+      C_WordPractice_status,
       input_value,
       input_placeholder,
       input_readonly,
@@ -132,17 +132,16 @@ export default defineComponent({
     
     const confirm = () => {
       let newmatch = input_value.value === data.value.word;
-      console.log(newmatch, input_value.value, data.value.word);
       emit('update:match', newmatch);
       if (newmatch) { emit('onMatch', true); }
       
-      if(status.value === VSpellWord_status.none)
+      if(status.value === C_WordPractice_status.none)
       {
-        let newstatus = VSpellWord_status.none;
+        let newstatus = C_WordPractice_status.none;
         if(input_value.value === data.value.word)
-          newstatus = VSpellWord_status.correct;
+          newstatus = C_WordPractice_status.correct;
         else
-          newstatus = VSpellWord_status.incorrect;
+          newstatus = C_WordPractice_status.incorrect;
         emit('update:status', newstatus);
       }
       
@@ -154,7 +153,7 @@ export default defineComponent({
     }
     
     const show = () => {
-      emit('update:status', VSpellWord_status.incorrect);
+      emit('update:status', C_WordPractice_status.incorrect);
       input_placeholder.value = data.value.word;
       input_value.value = '';
     }
