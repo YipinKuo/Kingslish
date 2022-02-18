@@ -1,0 +1,25 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "nuxi dev",
+    "build": "nuxi build",
+    "start": "node .output/server/index.mjs"
+  },
+  "devDependencies": {
+    "nuxt3": "latest",
+    "sass": "^1.49.7",
+    "sass-loader": "^10.2.1"
+  },
+  "dependencies": {
+    "-": "0.0.1",
+    "@nuxtjs/axios": "^5.13.6",
+    "@popperjs/core": "^2.11.2",
+    "autoprefixer": "^10.4.2",
+    "element-ui": "^2.15.6",
+    "fibers": "^5.0.1",
+    "mongodb": "^4.3.1",
+    "postcss": "^8.4.6",
+    "postcss-loader": "^6.2.1",
+    "save-dev": "0.0.1-security"
+  }
+}
