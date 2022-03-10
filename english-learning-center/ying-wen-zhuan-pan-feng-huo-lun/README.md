@@ -18,4 +18,4 @@ description: 解忙英文痛點，玩弄英文結構，做自己英文句子的�
 
 ### [feng-huo-lun-bao-dian.md](feng-huo-lun-bao-dian.md "mention")
 
-完整的英
+英文轉盤風火輪電子書，系統化解構文法、單字解析，無論走到哪都可隨時增強英文程度。
