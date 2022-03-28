@@ -26,7 +26,9 @@
   * [動狀詞](english-learning-center/wen-fa-xue-xi/dong-zhuang-ci.md)
   * [綜合練習](english-learning-center/wen-fa-xue-xi/zong-he-lian-xi.md)
 * [學習歷程](english-learning-center/xue-xi-li-cheng.md)
-* [英文檔案庫](english-learning-center/ying-wen-dang-an-ku.md)
+* [英文檔案庫](english-learning-center/ying-wen-dang-an-ku/README.md)
+  * [單字字典](english-learning-center/ying-wen-dang-an-ku/dan-zi-zi-dian.md)
+  * [文法學習](english-learning-center/ying-wen-dang-an-ku/wen-fa-xue-xi.md)
 
 ## Classroom
 
